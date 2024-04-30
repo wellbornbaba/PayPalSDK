@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayPal SDK </title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        function openPayPalLogin(paypalLoginUrl) {
+            // Open PayPal login page in a new window without the status bar
+            var popup = window.open(
+                paypalLoginUrl,
+                'PayPalLogin',
+                'width=500,height=600,status=no,toolbar=no,menubar=no'
+            );
+
+            // Focus the window if it's already open
+            if (popup) {
+                popup.focus();
+            } else {
+                // Handle popup blocker
+                alert('Please allow popups for this site to proceed with PayPal login.');
+            }
+        }
+
+        $(document).on('submit', 'form#paypal', function (evt) {
+            var formData = new FormData($(this)[0]);
+            evt.preventDefault();
+            let container = $("#resultcontainer");
+
+            $.ajax({
+                type: "POST",
+                url: "pay.php",
+                data: formData,
+                dataType: 'json',
+                success: function (res) {
+                    console.log(res)
+                    if (res.status) {
+                        container.html('<div class="alert alert-success">Redirecting to Paypal, please wait...</div>')
+                        setTimeout(function () {
+                            window.open(res.msg, "_self")
+                        }, 1000)
+                        // openPayPalLogin(res.msg)
+
+                    } else {
+                        container.html(res.msg)
+                    }
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+            return false;
+
+        });
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <form action="" id="paypal" method="post">
+            <div id="resultcontainer"></div>
+            <div>Amount: <input type="text" class="form-control" name="amount" value="50"></div>
+            <div>Invoice: <input type="text" class="form-control" name="invoice" value=""></div>
+            <button type="submit" name="paypalsubmit">Pay with PAYPAL</button>
+        </form>
+    </div>
+</body>
+
+</html>
